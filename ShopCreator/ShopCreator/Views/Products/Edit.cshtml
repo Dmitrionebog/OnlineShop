@@ -1,0 +1,282 @@
+﻿@model ShopCreator.Models.Product
+
+@{
+    Layout = "_Layout";
+}
+
+@{
+    var result = "[";
+    var properties = ViewBag.Properties;
+    foreach (var oneProp in properties)
+    {
+        result = result + "{" + String.Format("Id: \"{0}\",  Name: \"{1}\",  Type: \"{2}\", ValidValues: \"{3}\"", oneProp.Id, oneProp.Name, oneProp.Type, oneProp.ValidValues) + "}" + ",";
+    }
+    result = result.Remove(result.Length - 1) + "]";
+    //var result = "[{ Id: 1, Name: \"abcd\" }, { Id: 2, Name: \"dbca\" }]";
+}
+
+@{
+    var categoriesIds = (int[][]) ViewBag.IdsOfSelectedCategories;
+    var AllChainSelects = (ShopCreator.Models.DTOs.Category_Id_and_Name_and_HasChilds_and_CheckedId[][][])ViewBag.AllChainSelects;
+}
+<script type='text/javascript'>
+
+        function getProperties() {
+            Properties = @Html.Raw(result);
+        }
+
+     window.onload = function ()
+     {
+         getProperties();
+         updateSelectsAfterClick();
+         addAllValidation(Properties);
+
+         var elements = document.getElementsByClassName("deleteChain");
+         for (let element of elements) {
+             element.addEventListener("click", DeleteChain);
+         }
+    }
+
+
+
+     function ChangeImage()
+        {
+            //удаление старой img
+            document.getElementById('imageOfProduct').parentNode.removeChild(document.getElementById('imageOfProduct'));
+            //создание нового input
+            //var input = document.createElement("input");
+            //input.type = "file";
+            //input.name = "uploadedFile";
+            //ищем место куда вставить кнопку для добавления новой картинки и добавлеям
+            //var div = document.getElementById("divWithImageOfProduct");
+            //div.appendChild(input);
+    }
+
+    function DeleteChain(event) {
+        event.path[1].remove();
+    }
+</script>
+<script src="~/js/site.js"></script>
+
+<style>
+    .oneCategory {
+        border: 4px double black;
+    }
+
+    .myClass {
+        /*display:inline-block;*/
+        float: left;
+        width: 44%;
+        margin: 5px 10px 5px 0px;
+    }
+
+    .myClass2 {
+        /*display:inline-block;*/
+        float: left;
+        margin-top: 8%;
+    }
+
+    .checkboxInput {
+        height: 34px;
+    }
+
+    select {
+        /*-webkit-box-sizing: padding-box !important;
+        -moz-box-sizing: padding-box !important;
+        box-sizing: content-box !important;*/
+    }
+
+    div {
+        box-sizing: content-box;
+    }
+</style>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Edit</title>
+</head>
+<body>
+
+    <h4>Product</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Edit" enctype="multipart/form-data" id="myForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <div class="form-group">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                @*<div class="form-group">
+            <label asp-for="Company" class="control-label"></label>
+            <input asp-for="Company" class="form-control" />
+            <span asp-validation-for="Company" class="text-danger"></span>
+        </div>*@
+                <div class="form-group">
+                    <label asp-for="Price" class="control-label"></label>
+                    <input asp-for="Price" class="form-control" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+                <div class="form-group" id="divWithImageOfProduct">
+                    <label asp-for="Image" class="control-label"></label>
+                    <img height="36" width="64" id="imageOfProduct" src=@((Model.Image?.MinPath!=null) ? Url.Content(Model.Image.MinPath) :"/images/NotFound.jpg")>
+                    <input type="file" name="uploadedFile" style="color:transparent" onchange="this.style.color = 'black'" onclick="ChangeImage()" /><br>
+                    @*<button onclick="ChangeImage()">Change Image</button>*@
+                </div>
+
+                <div id="divPropertiesContainer" class="form-group" onclick="updateSelectsAfterClick()">
+
+                    @for (int i = 0; i < Model.ProductProperties.Count; i++)
+                    {
+                        <div>
+                            @{var currentPropertyType = 0;
+                                string[] arrayOfStrings = null;
+                            }
+
+                            <div class="myClass">
+                                <label>Name of Property</label>
+                                <select class="idInput form-control" name="PropertiesOfProduct[@(i)].PropertyId" )>
+                                    @foreach (var oneProp in ViewBag.Properties)
+                                    {
+
+                                        @if (oneProp.Id == @Model.ProductProperties[i].PropertyId)
+                                        {
+                                            <option selected value="@oneProp.Id">@oneProp.Name</option>
+                                            currentPropertyType = oneProp.Type;
+                                            @if (currentPropertyType != 5)
+                                            {
+                                                arrayOfStrings = oneProp.ValidValues.Split(';');
+                                            }
+
+                                        }
+
+                                        else
+                                        {
+                                            <option value="@oneProp.Id">@oneProp.Name</option>
+                                        }
+
+                                    }
+                                </select>
+                            </div>
+                            <div class="myClass">
+                                <label>Value of Property</label>
+                                @if ((currentPropertyType == 0) || (currentPropertyType == 1) || (currentPropertyType == 2) || (currentPropertyType == 3))
+                                {
+                                    <input class="valueInput form-control" value="@Model.ProductProperties[i].Value" name="PropertiesOfProduct[@(i)].Value" />
+                                }
+                                else if (currentPropertyType == 4)
+                                {
+                                    <select class="valueInput form-control" name="PropertiesOfProduct[@(i)].Value" )>
+                                        @for (var indexOfOption = 0; indexOfOption < arrayOfStrings.Length; indexOfOption++)
+                                        {
+                                            @if (indexOfOption.ToString() == Model.ProductProperties[i].Value)
+                                            {
+                                                <option selected value="@indexOfOption">@arrayOfStrings[indexOfOption]</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@indexOfOption">@arrayOfStrings[indexOfOption]</option>
+                                            }
+                                        }
+                                    </select>
+                                }
+                                else
+                                {
+                                    if (Model.ProductProperties[i].Value == "on")
+                                    {<input class="valueInput checkboxInput" type="checkbox" style="width: 100%" name="PropertiesOfProduct[@(i)].Value" checked /> <br />}
+                                    else
+                                    { <input class="valueInput checkboxInput" type="checkbox" style="width:100%" name="PropertiesOfProduct[@(i)].Value" /> <br />}
+
+                                    @*<input class="valueInput checkboxHiddenInput myClass" type="hidden" value="off" name="PropertiesOfProduct[@(i)].Value" /> <br />*@
+                                }
+                            </div>
+                            <button class="myClass2" onclick="Close.bind(this)()">X</button>
+                            <br />
+                        </div>
+
+                    }
+
+                </div>
+
+
+                <div class="form-group">
+                    <button id="btnAddPropery" type="button" onclick="addNewFields(Properties)">Add Property</button>
+                </div>
+                
+                <div id="divCategoriesContainer" class="form-group" onclick = "myValidationCategories();button2IsVisiable(true);">
+                    @for (int i = 0; i < AllChainSelects.Length; i++)
+                    {
+                    <div class="oneCategory" style="display: flex">
+                        @for (int ii = 0; ii < AllChainSelects[i].Length; ii++)
+                        {
+                            @*<select class="form-control" name="IdsOfCategories" onchange=" IsMoreDropdown(true,this.options[this.selectedIndex], this)">*@
+                        <select class="form-control" name="IdsOfCategories" onchange="reDrawSelectsAfterClick.bind(this)();IsMoreDropdown(true, this.options[this.selectedIndex],this);">
+                            @for (int iii = 0; iii < AllChainSelects[i][ii].Length; iii++)
+                            {
+                                @if (AllChainSelects[i][ii][iii].HasChilds)
+                                {
+                                    @if (AllChainSelects[i][ii][iii].Id.ToString() == categoriesIds[i][ii].ToString())
+                                    {
+                                        <option selected data-haschilds="true" value="@AllChainSelects[i][ii][iii].Id">@AllChainSelects[i][ii][iii].Name.ToString()</option>
+                                    }
+                                    else
+                                    {
+                                        <option data-haschilds="true" value="@AllChainSelects[i][ii][iii].Id">@AllChainSelects[i][ii][iii].Name.ToString()</option>
+                                    }
+                                }
+                                else
+                                {
+                                    @if (AllChainSelects[i][ii][iii].Id.ToString() == categoriesIds[i][ii].ToString())
+                                    {
+                                        <option selected value="@AllChainSelects[i][ii][iii].Id">@AllChainSelects[i][ii][iii].Name.ToString()</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@AllChainSelects[i][ii][iii].Id">@AllChainSelects[i][ii][iii].Name.ToString()</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        }
+
+                        <button type="button" class="deleteChain">X</button>
+                    </div>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <button id="btnAddCategory" type="button" onclick="AddCategories(true)">Add Categories</button>
+                </div>
+
+                <div class="form-group">
+                    <input onclick="beforeSubmit();return myValidationCategories();" type="submit" value="Save" class="btn btn-default" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
+
+</body>
+</html>
+<script>
+    //initialize the validator
+    $('#myForm').validate();
+
+    $('[name="Name"]').rules("add",
+        {
+            required: true,
+            maxlength: 15
+        });
+
+    $('[name="Price"]').rules("add",
+        {
+            required: true,
+            digits: true
+        });
+</script>

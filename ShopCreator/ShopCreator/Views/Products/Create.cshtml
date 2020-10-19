@@ -1,0 +1,135 @@
+﻿@model ShopCreator.Models.ViewModels.ProductViewModel
+
+@{
+    Layout = "_Layout";
+}
+
+@{
+    var result = "[";
+    var properties = ViewBag.Properties;
+    foreach (var oneProp in properties)
+    {
+        result = result + "{" + String.Format("Id: \"{0}\",  Name: \"{1}\",  Type: \"{2}\", ValidValues: \"{3}\"", oneProp.Id, oneProp.Name, oneProp.Type, oneProp.ValidValues) + "}" + ",";
+    }
+    result = result.Remove(result.Length - 1) + "]";
+    //var result = "[{ Id: 1, Name: \"abcd\" }, { Id: 2, Name: \"dbca\" }]";
+}
+
+
+<script type='text/javascript'>
+
+function getProperties() {
+    Properties = @Html.Raw(result);
+    }
+
+    //function validate() {
+    //    var myForm = document.getElementById("myForm");
+    //  myForm.reportValidity();
+    //}
+
+</script>
+<script src="~/js/site.js"></script>
+
+
+
+
+
+<style>
+    .oneCategory {
+        border: 4px double black;
+    }
+    .myClass {
+        /*display:inline-block;*/
+        float: left;
+        width: 44%;
+        margin: 5px 10px 5px 0px;
+    }
+
+    .myClass2 {
+        /*display:inline-block;*/
+        float: left;
+        margin-top: 8%;
+    }
+
+    .checkboxInput {
+        height: 34px;
+    }
+
+    select {
+        /*-webkit-box-sizing: padding-box !important;
+        -moz-box-sizing: padding-box !important;
+        box-sizing: content-box !important;*/
+    }
+
+    div {
+        box-sizing: content-box;
+    }
+</style>
+
+<h4>Product</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" enctype="multipart/form-data" id="myForm" >
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <p>@ViewBag.PropertyTypes<p>
+
+                    <label asp-for="Name" class="control-label"></label>
+                    <input name="Name" class="form-control" />
+                    @*<input asp-for="Name" class="form-control" required pattern="^[a-zA-Z]+$" onfocusout="validate()" />*@
+                    <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Price" class="control-label"></label>
+                <input asp-for="Price" class="form-control" />
+                @*<input asp-for="Price" class="form-control" required pattern="^[ 0-9]+$" onfocusout="validate()" />*@
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+            <div id="divPropertiesContainer" class="form-group"  onclick="updateSelectsAfterClick()"></div>
+            <div class="form-group">
+
+                <button id="btnAddPropery" type="button" onclick="addNewFields(Properties)">Add Property</button>
+                @*<button id="btnAddPropery" type="button" onclick="addNewField()">Add Property</button>*@
+            </div>
+
+            <div id="divCategoriesContainer" class="form-group" onclick = "myValidationCategories.bind(this)(); button2IsVisiable(false);"></div>
+            <div class="form-group">
+                @*<button id="btnAddCategory" type="button">@Html.ActionLink("Add Category", "AddCategories", "Categories")</button>*@
+                <button id="btnAddCategory" type="button" onclick="AddCategories(false)">Add Categories</button>
+            </div>
+
+            <input type="file" name="uploadedFile" /><br>
+            <div class="form-group">
+                <input onclick="beforeSubmit();return myValidationCategories();" type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+
+<script>
+     //initialize the validator
+    $('#myForm').validate();
+
+    $('[name="Name"]').rules("add",
+        {
+            required: true,
+            maxlength: 15
+        });
+
+    $('[name="Price"]').rules("add",
+        {
+            required: true,
+            digits: true
+        });
+   
+
+</script>
+

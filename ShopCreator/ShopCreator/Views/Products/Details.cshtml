@@ -1,0 +1,74 @@
+﻿@model ShopCreator.Models.Product
+
+@{
+    Layout = "_Layout";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Details</title>
+</head>
+<body>
+
+<div>
+    <h4>Product</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+        @if (Model.ProductProperties.Count() != 0)
+        {
+            <dt>Properties of product</dt>
+            <dd>
+                <ul>
+                    @foreach (var property in Model.ProductProperties)
+                    {
+                        <li>Name of property : "@property.Property.Name" , Value of property : "@property.Value"</li>
+
+                    }
+                </ul>
+            </dd>
+
+        }
+
+        @if (Model.ProductCategories.Count() != 0)
+        {
+            <dt>Categories of product</dt>
+            <dd>
+                <ul>
+                    @foreach (var category in Model.ProductCategories)
+                    {
+                        <li>"@category.Category.Name"</li>
+
+                    }
+                </ul>
+            </dd>
+        }
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Image)
+        </dt>
+        <dd>
+            <img height="108" width="192" src=@((Model.Image?.Path!=null) ? Url.Content(Model.Image.Path) :"/images/NotFound.jpg")>
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+﻿@model ShopCreator.Models.Category
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Index</h2>
+
+@if (Model.Id == 0)
+{
+    <a asp-action="Create">Create New Top Category</a>
+}
+
+
+<p>@ViewBag.Path</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @if (Model.Id != 0)
+        {
+            <tr>
+                @Html.ActionLink("Return", "Index", "Categories", new { id = Model.ParentCategoryId })
+            </tr>
+        }
+
+        @foreach (var item in Model.ChildCategories)
+        {
+            <tr>
+                @if (item.ChildCategories.Count != 0)
+                {
+                    <td>
+                        @Html.ActionLink(item.Name, "Index", "Categories", new { id = item.Id })
+                    </td>
+                }
+
+                else
+                {
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                }
+
+
+                <td>
+                    <a asp-action="Create" asp-route-id="@item.Id">Create Child Category</a> |
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,55 @@
+﻿@model ShopCreator.Models.Category
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Category</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        @if (Model.ParentCategory != null)
+        {
+            <dt>Parent category name </dt>
+            <dd>@Model.ParentCategory.Name</dd>
+        }
+        else
+        {
+            <dt>It is top category </dt>
+            <dd></dd>
+        }
+
+        @if (Model.ChildCategories.Count() != 0)
+        {
+            <dt>Child categories names </dt>
+            <dd>
+                <ul>
+                    @foreach (var child in Model.ChildCategories)
+                    {
+                        <li>@child.Name</li>
+
+                    }
+                </ul>
+            </dd>
+        }
+        else
+        {
+            <dt>Category haven't childs </dt>
+            <dd></dd>
+        }
+
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
